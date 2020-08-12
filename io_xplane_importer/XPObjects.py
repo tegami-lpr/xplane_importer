@@ -102,7 +102,7 @@ class XPAnimation(XPObject):
 
 
 class XPMesh(XPObject):
-    def __init__(self, objdef, objImport):
+    def __init__(self, name: str, objdef, objImport):
         super().__init__()
         self.type = 'Mesh'
         self.objImport = objImport  # Link to ObjImport class
@@ -110,6 +110,7 @@ class XPMesh(XPObject):
         self.faces = []  # Faces defs from OBJ data
         self.params = []  # List of params for this mesh
         self.animParams = []  # List of animation params for object
+        self.name = name
 
         # objdef is array of next params:
         # [0] - name of geometry: TRIS or LINE
@@ -120,7 +121,7 @@ class XPMesh(XPObject):
         self.material = objImport.defaultMat
 
         if objImport.verbose > 0:
-            print("Create XPMesh with def: {}".format(objdef))
+            print("Create XPMesh with def: {} and name {}".format(objdef, self.name))
 
     # ------------------------------------------------------------------------
 
@@ -178,7 +179,7 @@ class XPMesh(XPObject):
     # ------------------------------------------------------------------------
 
     def _createEmptyObject(self, parent):
-        ob = bpy.data.objects.new("Empty", None)
+        ob = bpy.data.objects.new(self.name, None)
         ob.empty_display_size = 0.45
         ob.empty_display_type = 'PLAIN_AXES'
         print("Create empty object: {}, parent type: {}, parent name: {}".format(ob.name, parent.type, parent.blenderObject.name))
@@ -187,13 +188,12 @@ class XPMesh(XPObject):
     # ------------------------------------------------------------------------
 
     def _createMeshObject(self, parent):
-        self.mesh = bpy.data.meshes.new("Mesh")
-        meshName = self.mesh.name
+        self.mesh = bpy.data.meshes.new(self.name)
         # print("create mesh: {}".format(meshName))
         self.mesh.use_auto_smooth = True
 
         # Create Blender object for Mesh
-        ob = bpy.data.objects.new("Mesh", self.mesh)
+        ob = bpy.data.objects.new(self.name, self.mesh)
         print("Create mesh object: {}, parent: {}".format(ob.name, parent.type))
         return ob
 
@@ -276,8 +276,8 @@ class XPMesh(XPObject):
                             fcu_z.keyframe_points[i].co = i + 1, matrix[i].to_euler()[n]
                         # ob.rotation_euler = matrix[i].to_euler()
                         # ob.keyframe_insert(data_path='rotation_euler', frame=i+1, index=-1)
-                        if checkDrefName(drefName):
-                            self._addDrefValues(drefName, values)
+                    if checkDrefName(drefName):
+                        self._addDrefValues(drefName, values)
 
         if len(self.faces):
             _faces = []

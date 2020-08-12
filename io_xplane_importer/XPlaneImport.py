@@ -218,23 +218,32 @@ class OBJimport:
 
         self.emptyCount = 0  # Count of empty objects for animations
         self.animationCount = 0  # Count of animation objects
+        self.meshCount = 0  # Count of mesh objects
 
         self.currentrot = None  # current rotate_key axis, key and angles
         self.currenttrans = None  # current trans_key, key and postions
 
     # ------------------------------------------------------------------------
+
+    def info(self, message):
+        if self.verbose > 0:
+            print("INFO: {}".format(message))
+
+    # ------------------------------------------------------------------------
+
     def _creatingBlenderObjects(self):
-        if self.verbose:
-            print("----------------------------------------------")
-            print("Starting creation object from imported data...")
-        self.xpRootObject.printLadder(0)
+        self.info("----------------------------------------------")
+        self.info("Starting creation object from imported data...")
+
+        if self.verbose > 1:
+            self.xpRootObject.printLadder(0)
+
         self.xpRootObject.doImport(None)
 
     # ------------------------------------------------------------------------
     def doimport(self):
         # clock=time.clock()	# Processor time
-        if self.verbose:
-            print("Starting OBJ reading from " + self.filename)
+        self.info("Starting OBJ reading from " + self.filename)
 
         self.file = open(self.filename, 'rU')
         self.file.seek(0, 2)
@@ -357,10 +366,15 @@ class OBJimport:
 
     def _createMesh(self, t, a, b):
         objdef = (t, a, b)
-        mesh = XPMesh(objdef, self)
+
+        if t.find("Empty") >= 0:
+            name = t
+        else:
+            name = "Mesh_{}".format(self.meshCount)
+            self.meshCount += 1
+
+        mesh = XPMesh(name, objdef, self)
         # Adding params to mesh
-        #for param in self.meshAnimParams:
-        #    mesh.addParam(param)
         if len(self.animParamStack):
             for param in self.animParamStack[-1]:
                 mesh.addParam(param)
