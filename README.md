@@ -33,6 +33,10 @@ But you can change handleKeyAnim to True in XPlaneUtils.py to import by keys. Bu
 - Handle lights.
 - Handle manipulator properties.
 
+### Warning:
+All imported triangles have their own set of dots (faces just separated from each other). And after importing
+there necessary select mesh and merge vertices (Mesh->Merge->By Distance).  It will be fixed in future...
+
 ## License
 
 This software is licensed under a Creative Commons License Attribution-Noncommercial-Share Alike 3.0
