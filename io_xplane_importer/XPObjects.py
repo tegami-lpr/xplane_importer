@@ -24,6 +24,7 @@ class XPObject(object):
     def __init__(self):
         self.type = 'None'
         self.children = []
+        self.child_offset = Vertex(0, 0, 0)
 
     def addChild(self, child):
         self.children.append(child)
@@ -200,8 +201,8 @@ class XPMesh(XPObject):
     # ------------------------------------------------------------------------
     def doImport(self, parent):
         self._prepareFaces()
-        centre = Vertex(0, 0, 0)
 
+        centre = Vertex(0, 0, 0)
         ob = None
         if len(self.faces):
             ob = self._createMeshObject(parent)
@@ -216,9 +217,11 @@ class XPMesh(XPObject):
         ob.parent = parent.blenderObject
 
         # Reset parenting offset
-        ob.matrix_parent_inverse = mathutils.Matrix(ob.parent.matrix_world).inverted()
+        #ob.matrix_parent_inverse = mathutils.Matrix(ob.parent.matrix_world).inverted()
         # Adding object to current scene
         bpy.context.scene.collection.objects.link(ob)
+
+        ob.location = (parent.child_offset.x, parent.child_offset.y, parent.child_offset.z)
 
         if len(self.animParams):
             print('Mesh has animation')
@@ -242,13 +245,14 @@ class XPMesh(XPObject):
                             ob.location = (off.x + ob.location[0], off.y + ob.location[1], off.z + ob.location[2])
                             print("Fix object position to {}".format(centre))
                             centre = Vertex(0, 0, 0)
+                            self.child_offset = Vertex(-off.x, -off.y, -off.z)
 
                     if not positions[0].equals(positions[1]):
                         for n in range(0, 3):
                             fcu_z = anim_data.action.fcurves.new(data_path="location", index=n)
                             fcu_z.keyframe_points.add(len(positions))
                             for i in range(len(positions)):
-                                fcu_z.keyframe_points[i].co = i + 1, positions[i].toVector(3)[n]
+                                fcu_z.keyframe_points[i].co = i + 1, positions[i].toVector(3)[n] + ob.location[n]
                         self._addDrefValues(drefName, values)
                     else:
                         # Some time AC3D create dummy translate animation to move object to right place
