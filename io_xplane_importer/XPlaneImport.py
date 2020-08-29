@@ -378,6 +378,7 @@ class OBJimport:
         if len(self.animParamStack):
             for param in self.animParamStack[-1]:
                 mesh.addParam(param)
+            self.animParamStack[-1] = []
 
         return mesh
 

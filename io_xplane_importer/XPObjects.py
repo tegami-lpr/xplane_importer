@@ -231,21 +231,13 @@ class XPMesh(XPObject):
             hasRotation = False
             off = None
 
+            needPosReFix = False
+            reFixDone = False  # Ignore second position fix. 
+
             for animParam in self.animParams:
                 print("Current anim: {}, dref: {}".format(animParam[0], animParam[3]))
                 if animParam[0] == 'ANIM_trans':
                     (_, positions, values, drefName) = animParam
-
-                    if animParam == self.animParams[0]:
-                        if not checkDrefName(drefName):
-                            # Fix for object position by dummy ANIM_trans
-
-                            centre = positions[0]
-                            off = centre
-                            ob.location = (off.x + ob.location[0], off.y + ob.location[1], off.z + ob.location[2])
-                            print("Fix object position to {}".format(centre))
-                            centre = Vertex(0, 0, 0)
-                            self.child_offset = Vertex(-off.x, -off.y, -off.z)
 
                     if not positions[0].equals(positions[1]):
                         for n in range(0, 3):
@@ -253,12 +245,26 @@ class XPMesh(XPObject):
                             fcu_z.keyframe_points.add(len(positions))
                             for i in range(len(positions)):
                                 fcu_z.keyframe_points[i].co = i + 1, positions[i].toVector(3)[n] + ob.location[n]
-                        self._addDrefValues(drefName, values)
+                        if checkDrefName(drefName):
+                            self._addDrefValues(drefName, values)
                     else:
                         # Some time AC3D create dummy translate animation to move object to right place
-                        if animParam != self.animParams[0]:
-                            #centre = Vertex(positions[1].x, positions[1].y, positions[1].z)
-                            centre = off
+
+                        if needPosReFix == False:
+                            if reFixDone == False:
+                                # Fix for object position by dummy ANIM_trans
+                                off = positions[0]
+                                ob.location = (off.x + ob.location[0], off.y + ob.location[1], off.z + ob.location[2])
+                                print("Fix object position to {}".format(off))
+                                self.child_offset = Vertex(-off.x, -off.y, -off.z)
+                                needPosReFix = True
+
+                        else:
+                            if reFixDone == False:
+                                #centre = Vertex(positions[1].x, positions[1].y, positions[1].z)
+                                centre = off
+                                needPosReFix = False
+                                reFixDone = True
 
                 elif animParam[0] == 'ANIM_rotate':
                     if hasRotation:
@@ -290,6 +296,8 @@ class XPMesh(XPObject):
                 face = []
                 for v in f.v:
                     face.append(len(_verts))
+                    if centre.x == 0:
+                        pass
                     _verts.append([v.x - centre.x, v.y - centre.y, v.z - centre.z])
                 _faces.append(face)
 
