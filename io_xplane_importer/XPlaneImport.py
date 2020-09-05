@@ -349,6 +349,8 @@ class OBJimport:
     def _addXPObject(self, xpObject):
         if len(self.animationChain):
             parent = self.animationChain[-1]
+            if len(parent.children):
+                parent = parent.children[-1]
         else:
             parent = self.xpRootObject
 
