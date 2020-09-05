@@ -271,7 +271,7 @@ class XPMesh(XPObject):
                         # TODO: fix many rotate animations
                         continue
                     hasRotation = True
-                    (_, matrix, values, drefName) = animParam
+                    # (_, matrix, values, drefName) = animParam
                     # for n in range(0, 4):
                     #     fcu_z = anim_data.action.fcurves.new(data_path="rotation_quaternion", index=n)
                     #     fcu_z.keyframe_points.add(len(matrix))
@@ -279,13 +279,23 @@ class XPMesh(XPObject):
                     #         fcu_z.keyframe_points[i].co = i + 1, matrix[i].to_quaternion()[n]
                     # self._addDrefValues(drefName, values)
 
-                    for n in range(0, 3):
-                        fcu_z = ob.animation_data.action.fcurves.new(data_path="rotation_euler", index=n)
+                    # for n in range(0, 3):
+                    #     fcu_z = ob.animation_data.action.fcurves.new(data_path="rotation_euler", index=n)
+                    #     fcu_z.keyframe_points.add(len(matrix))
+                    #     for i in range(len(matrix)):
+                    #         fcu_z.keyframe_points[i].co = i + 1, matrix[i].to_euler()[n]
+
+                    (_, p, matrix, values, drefName) = animParam
+                    ob.rotation_mode = "AXIS_ANGLE"
+                    for n in range(0, 4):
+                        fcu_z = ob.animation_data.action.fcurves.new(data_path="rotation_axis_angle", index=n)
                         fcu_z.keyframe_points.add(len(matrix))
                         for i in range(len(matrix)):
-                            fcu_z.keyframe_points[i].co = i + 1, matrix[i].to_euler()[n]
-                        # ob.rotation_euler = matrix[i].to_euler()
-                        # ob.keyframe_insert(data_path='rotation_euler', frame=i+1, index=-1)
+                            if n == 0:
+                                fcu_z.keyframe_points[i].co = i + 1, matrix[i]  # W - value
+                            else:
+                                fcu_z.keyframe_points[i].co = i + 1, p[n-1]
+
                     if checkDrefName(drefName):
                         self._addDrefValues(drefName, values)
 

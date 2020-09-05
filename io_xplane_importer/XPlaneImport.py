@@ -556,8 +556,9 @@ class OBJimport:
                 m2 = mathutils.Matrix.Rotation(radians(r2), 4, p.toVector(3))
                 # print(m1)
                 # print(m2)
-                self.animParamStack[-1].append([t, [m1, m2], [v1, v2], datarefName])
-                #self.meshAnimParams.append([t, [m1, m2], [v1, v2], datarefName])
+                # self.animParamStack[-1].append([t, [m1, m2], [v1, v2], datarefName])
+                self.animParamStack[-1].append([t, p.toVector(3), [radians(r1), radians(r2)], [v1, v2], datarefName])
+
 
             elif t == 'ANIM_rotate_begin':
                 p = self._getVertex()
@@ -568,7 +569,7 @@ class OBJimport:
             elif t == 'ANIM_rotate_key':
                 v = self._getFloat()
                 r = self._getFloat()
-                self.currentrot.addKey(v, r)
+                self.currentrot.addKey(v, radians(r))
 
             elif t == 'ANIM_rotate_end':
                 print('DEBUG:\t Found ANIM_rotate_end for dref {}.'.format(self.currentrot.dataRef))

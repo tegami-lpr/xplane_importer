@@ -26,8 +26,6 @@ What this plugin can do:
 
 What plugin can't do:
 - Import normals.
-- Handle keyed animations properly. By default plugin just take first and last values.
-But you can change handleKeyAnim to True in XPlaneUtils.py to import by keys. But some time Xplane2Blender export keyed animations with errors. 
 - Handle ANIM_show and ANIM_hide.
 - Handle any material properties.
 - Handle lights.

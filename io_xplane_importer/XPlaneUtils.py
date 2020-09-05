@@ -15,10 +15,6 @@ import bpy
 import mathutils
 from mathutils import Matrix, Vector, Euler
 
-handleKeyAnim = False
-#handleKeyAnim = True
-
-
 class Vertex:
     LIMIT = 0.0001  # max distance between vertices for them to be merged
     ROUND = 4  # Precision
@@ -581,43 +577,18 @@ class CurrentRotate:
 
         self.values = []  # List of rotating values
 
-    def addKey(self, v, r):
-        self.values.append((v, r))
+    def addKey(self, drefValue, angle):
+        self.values.append((drefValue, angle))
 
 
     def toMeshParam(self):
         mxs = []
         vals = []
+        for value in self.values:
+            mxs.append(value[1])
+            vals.append(value[0])
 
-        vector = self.vector.toVector(3)
-
-        # Because XPlane2Blender on reExport mix rotate and translate animation
-        # then we just add first and last steps
-        # TODO: find a way to add step anim properly
-        if handleKeyAnim:
-            for value in self.values:
-                m = mathutils.Matrix.Rotation(radians(value[1]), 4, vector)
-                mxs.append(m)
-                vals.append(value[0])
-        else:
-            r1 = self.values[0][1]  # Start angle
-            r2 = self.values[-1][1]  # Stop angle
-
-            m1 = mathutils.Matrix.Rotation(radians(r1), 4, vector)
-            v1 = self.values[0][0]
-            mxs.append(m1)
-            vals.append(v1)
-
-            v2 = self.values[-1][0]
-            while r2 >= 360 or r2 <= -360:
-                # hack from old code
-                r2 /= 2
-                v2 /= 2
-            m2 = mathutils.Matrix.Rotation(radians(r2), 4, vector)
-            mxs.append(m2)
-            vals.append(v2)
-
-        param = ["ANIM_rotate", mxs, vals, self.dataRef]
+        param = ["ANIM_rotate", self.vector.toVector(3), mxs, vals, self.dataRef]
         return param
 
 
@@ -634,22 +605,9 @@ class CurrentTranslate:
         pos = []
         vals = []
 
-        # TODO: find a way to add step anim properly
-        if handleKeyAnim:
-            for value in self.values:
-                pos.append(value[1])
-                vals.append(value[0])
-        else:
-            p1 = self.values[0][1]
-            v1 = self.values[0][0]
-            pos.append(p1)
-            vals.append(v1)
-
-            p2 = self.values[-1][1]
-            v2 = self.values[-1][0]
-            pos.append(p2)
-            vals.append(v2)
+        for value in self.values:
+            pos.append(value[1])
+            vals.append(value[0])
 
         param = ["ANIM_trans", pos, vals, self.dataRef]
-        print(param)
         return param
